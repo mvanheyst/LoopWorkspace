@@ -36,7 +36,7 @@ jobs:
 
           # Submodule Loop patches:
           # Loop: LoopCoreConstants.swift: Change default absorption time to 30min, 1hr, 2hr
-          curl https://github.com/mvanheyst/Loop/commit/SHA-1.patch | git apply -v --directory=Loop
+          curl https://github.com/mvanheyst/Loop/commit/cac83797a7a0bb64e530234effe00e52bb9d3bfa | git apply -v --directory=Loop
 
           # Submodule LoopKit patches:
           # LoopKit: Filename: customization details
