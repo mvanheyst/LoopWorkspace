@@ -37,10 +37,10 @@ index fb5b431074..39ecc0a041 100644
      convenience init(from alert: Alert, context: NSManagedObjectContext, issuedDate: Date = Date(), syncIdentifier: UUID = UUID()) {
          do {
              /// This code, using the `init(entity:insertInto:)` instead of the `init(context:)` avoids warnings during unit testing that look like this:
-diff --git a/LoopTests/Managers/Alerts/AlertStoreTests.swift b/LoopTests/Managers/Alerts/AlertStoreTests.swift
+diff --git a/Loop/LoopTests/Managers/Alerts/AlertStoreTests.swift b/Loop/LoopTests/Managers/Alerts/AlertStoreTests.swift
 index 3f6286cf17..bb9d109633 100644
---- a/LoopTests/Managers/Alerts/AlertStoreTests.swift
-+++ b/LoopTests/Managers/Alerts/AlertStoreTests.swift
+--- a/Loop/LoopTests/Managers/Alerts/AlertStoreTests.swift
++++ b/Loop/LoopTests/Managers/Alerts/AlertStoreTests.swift
 @@ -72,8 +72,8 @@ class AlertStoreTests: XCTestCase {
              let object = StoredAlert(from: alert2, context: alertStore.managedObjectContext, issuedDate: Self.historicDate)
              XCTAssertNil(object.acknowledgedDate)
@@ -75,10 +75,10 @@ index 3f6286cf17..bb9d109633 100644
          XCTAssertEqual(progress.completedUnitCount, 3 * 1)
      }
  
-diff --git a/LoopTests/Managers/Alerts/StoredAlertTests.swift b/LoopTests/Managers/Alerts/StoredAlertTests.swift
+diff --git a/Loop/LoopTests/Managers/Alerts/StoredAlertTests.swift b/Loop/LoopTests/Managers/Alerts/StoredAlertTests.swift
 index 504a672fae..85fe753c7d 100644
---- a/LoopTests/Managers/Alerts/StoredAlertTests.swift
-+++ b/LoopTests/Managers/Alerts/StoredAlertTests.swift
+--- a/Loop/LoopTests/Managers/Alerts/StoredAlertTests.swift
++++ b/Loop/LoopTests/Managers/Alerts/StoredAlertTests.swift
 @@ -45,10 +45,10 @@ class StoredAlertEncodableTests: XCTestCase {
              let storedAlert = StoredAlert(from: alert, context: managedObjectContext, syncIdentifier: UUID(uuidString: "A7073F28-0322-4506-A733-CF6E0687BAF7")!)
              XCTAssertEqual(.active, storedAlert.interruptionLevel)
@@ -120,10 +120,10 @@ index 504a672fae..85fe753c7d 100644
              )
          }
      }
-diff --git a/LoopTests/ViewModels/BolusEntryViewModelTests.swift b/LoopTests/ViewModels/BolusEntryViewModelTests.swift
+diff --git a/Loop/LoopTests/ViewModels/BolusEntryViewModelTests.swift b/Loop/LoopTests/ViewModels/BolusEntryViewModelTests.swift
 index c373b639b1..7f2c421ebf 100644
---- a/LoopTests/ViewModels/BolusEntryViewModelTests.swift
-+++ b/LoopTests/ViewModels/BolusEntryViewModelTests.swift
+--- a/Loop/LoopTests/ViewModels/BolusEntryViewModelTests.swift
++++ b/Loop/LoopTests/ViewModels/BolusEntryViewModelTests.swift
 @@ -702,14 +702,14 @@ class BolusEntryViewModelTests: XCTestCase {
      func testCarbEntryDateAndAbsorptionTimeString() async throws {
          await setUpViewModel(originalCarbEntry: mockOriginalCarbEntry, potentialCarbEntry: mockPotentialCarbEntry)
@@ -152,10 +152,10 @@ Subject: [PATCH 2/4] make it easier to save a Favorite Food from Carb Entry
  Loop/View Models/CarbEntryViewModel.swift | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/Loop/View Models/CarbEntryViewModel.swift b/Loop/View Models/CarbEntryViewModel.swift
+diff --git a/Loop/Loop/View Models/CarbEntryViewModel.swift b/Loop/View Models/CarbEntryViewModel.swift
 index 261c529ed5..37dedee326 100644
---- a/Loop/View Models/CarbEntryViewModel.swift	
-+++ b/Loop/View Models/CarbEntryViewModel.swift	
+--- a/Loop/Loop/View Models/CarbEntryViewModel.swift	
++++ b/Loop/Loop/View Models/CarbEntryViewModel.swift	
 @@ -140,7 +140,7 @@ final class CarbEntryViewModel: ObservableObject {
      
      var saveFavoriteFoodButtonDisabled: Bool {
@@ -176,10 +176,10 @@ Subject: [PATCH 3/4] remove shaking phone as trigger for presentDebugMenu
  Loop/View Controllers/StatusTableViewController.swift | 9 ---------
  1 file changed, 9 deletions(-)
 
-diff --git a/Loop/View Controllers/StatusTableViewController.swift b/Loop/View Controllers/StatusTableViewController.swift
+diff --git a/Loop/Loop/View Controllers/StatusTableViewController.swift b/Loop/Loop/View Controllers/StatusTableViewController.swift
 index 8906a75986..6a4aadfcdd 100644
---- a/Loop/View Controllers/StatusTableViewController.swift	
-+++ b/Loop/View Controllers/StatusTableViewController.swift	
+--- a/Loop/Loop/View Controllers/StatusTableViewController.swift	
++++ b/Loop/Loop/View Controllers/StatusTableViewController.swift	
 @@ -1865,15 +1865,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
          lastOrientation = UIDevice.current.orientation
      }
@@ -206,10 +206,10 @@ Subject: [PATCH 4/4] Bump version to 3.5.0 to signify dev branch
  Version.xcconfig | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/Version.xcconfig b/Version.xcconfig
+diff --git a/Loop/Version.xcconfig b/Loop/Version.xcconfig
 index 373efdca05..a7c7fe29d1 100644
---- a/Version.xcconfig
-+++ b/Version.xcconfig
+--- a/Loop/Version.xcconfig
++++ b/Loop/Version.xcconfig
 @@ -7,7 +7,7 @@
  //
  
