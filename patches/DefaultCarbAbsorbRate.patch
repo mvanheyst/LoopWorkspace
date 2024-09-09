@@ -1,0 +1,221 @@
+From 7179901e8729e552cb7d527c75ef22e2bd867287 Mon Sep 17 00:00:00 2001
+From: Pete Schwamb <pete@schwamb.net>
+Date: Sun, 18 Feb 2024 11:28:25 -0600
+Subject: [PATCH 1/4] Updates to tests for iOS 17 (#2080)
+
+---
+ Loop/Managers/Alerts/StoredAlert.swift        | 16 ++++++++++++---
+ .../Managers/Alerts/AlertStoreTests.swift     | 20 +++++++++----------
+ .../Managers/Alerts/StoredAlertTests.swift    | 12 +++++------
+ .../ViewModels/BolusEntryViewModelTests.swift |  4 ++--
+ 4 files changed, 31 insertions(+), 21 deletions(-)
+
+diff --git a//Loop/Loop/Managers/Alerts/StoredAlert.swift b/Loop/Loop/Managers/Alerts/StoredAlert.swift
+index fb5b431074..39ecc0a041 100644
+--- a/Loop/Loop/Managers/Alerts/StoredAlert.swift
++++ b/Loop/Loop/Managers/Alerts/StoredAlert.swift
+@@ -12,9 +12,19 @@ import UIKit
+ 
+ extension StoredAlert {
+     
+-    static var encoder = JSONEncoder()
+-    static var decoder = JSONDecoder()
+-          
++    static let encoder: JSONEncoder = {
++        let encoder = JSONEncoder()
++        encoder.outputFormatting = [.sortedKeys]
++        encoder.dateEncodingStrategy = .iso8601
++        return encoder
++    }()
++
++    static let decoder: JSONDecoder = {
++        let decoder = JSONDecoder()
++        decoder.dateDecodingStrategy = .iso8601
++        return decoder
++    }()
++
+     convenience init(from alert: Alert, context: NSManagedObjectContext, issuedDate: Date = Date(), syncIdentifier: UUID = UUID()) {
+         do {
+             /// This code, using the `init(entity:insertInto:)` instead of the `init(context:)` avoids warnings during unit testing that look like this:
+diff --git a/LoopTests/Managers/Alerts/AlertStoreTests.swift b/LoopTests/Managers/Alerts/AlertStoreTests.swift
+index 3f6286cf17..bb9d109633 100644
+--- a/LoopTests/Managers/Alerts/AlertStoreTests.swift
++++ b/LoopTests/Managers/Alerts/AlertStoreTests.swift
+@@ -72,8 +72,8 @@ class AlertStoreTests: XCTestCase {
+             let object = StoredAlert(from: alert2, context: alertStore.managedObjectContext, issuedDate: Self.historicDate)
+             XCTAssertNil(object.acknowledgedDate)
+             XCTAssertNil(object.retractedDate)
+-            XCTAssertEqual("{\"title\":\"title\",\"acknowledgeActionButtonLabel\":\"label\",\"body\":\"body\"}", object.backgroundContent)
+-                XCTAssertEqual("{\"title\":\"title\",\"acknowledgeActionButtonLabel\":\"label\",\"body\":\"body\"}", object.foregroundContent)
++            XCTAssertEqual("{\"acknowledgeActionButtonLabel\":\"label\",\"body\":\"body\",\"title\":\"title\"}", object.backgroundContent)
++            XCTAssertEqual("{\"acknowledgeActionButtonLabel\":\"label\",\"body\":\"body\",\"title\":\"title\"}", object.foregroundContent)
+             XCTAssertEqual("managerIdentifier2.alertIdentifier2", object.identifier.value)
+             XCTAssertEqual(Self.historicDate, object.issuedDate)
+             XCTAssertEqual(1, object.modificationCounter)
+@@ -870,14 +870,14 @@ class AlertStoreLogCriticalEventLogTests: XCTestCase {
+                                        endDate: dateFormatter.date(from: "2100-01-02T03:09:00Z")!,
+                                        to: outputStream,
+                                        progress: progress))
+-        XCTAssertEqual(outputStream.string, """
+-[
+-{"acknowledgedDate":"2100-01-02T03:08:00.000Z","alertIdentifier":"a1","backgroundContent":"{\\\"title\\\":\\\"BACKGROUND\\\",\\\"acknowledgeActionButtonLabel\\\":\\\"OK\\\",\\\"body\\\":\\\"background\\\"}","interruptionLevel":"timeSensitive","issuedDate":"2100-01-02T03:08:00.000Z","managerIdentifier":"m1","modificationCounter":1,"syncIdentifier":"52A046F7-F449-49B2-B003-7A378D0002DE","triggerType":0},
+-{"acknowledgedDate":"2100-01-02T03:04:00.000Z","alertIdentifier":"a3","backgroundContent":"{\\\"title\\\":\\\"BACKGROUND\\\",\\\"acknowledgeActionButtonLabel\\\":\\\"OK\\\",\\\"body\\\":\\\"background\\\"}","interruptionLevel":"timeSensitive","issuedDate":"2100-01-02T03:04:00.000Z","managerIdentifier":"m3","modificationCounter":3,"syncIdentifier":"285AEA4B-0DEE-41F4-8669-800E9582A6E7","triggerType":0},
+-{"acknowledgedDate":"2100-01-02T03:06:00.000Z","alertIdentifier":"a4","backgroundContent":"{\\\"title\\\":\\\"BACKGROUND\\\",\\\"acknowledgeActionButtonLabel\\\":\\\"OK\\\",\\\"body\\\":\\\"background\\\"}","interruptionLevel":"timeSensitive","issuedDate":"2100-01-02T03:06:00.000Z","managerIdentifier":"m4","modificationCounter":4,"syncIdentifier":"4B3109BD-DE11-42BD-A777-D4783459C483","triggerType":0}
+-]
+-"""
+-        )
++
++        XCTAssertEqual(outputStream.string, #"""
++            [
++            {"acknowledgedDate":"2100-01-02T03:08:00.000Z","alertIdentifier":"a1","backgroundContent":"{\"acknowledgeActionButtonLabel\":\"OK\",\"body\":\"background\",\"title\":\"BACKGROUND\"}","interruptionLevel":"timeSensitive","issuedDate":"2100-01-02T03:08:00.000Z","managerIdentifier":"m1","modificationCounter":1,"syncIdentifier":"52A046F7-F449-49B2-B003-7A378D0002DE","triggerType":0},
++            {"acknowledgedDate":"2100-01-02T03:04:00.000Z","alertIdentifier":"a3","backgroundContent":"{\"acknowledgeActionButtonLabel\":\"OK\",\"body\":\"background\",\"title\":\"BACKGROUND\"}","interruptionLevel":"timeSensitive","issuedDate":"2100-01-02T03:04:00.000Z","managerIdentifier":"m3","modificationCounter":3,"syncIdentifier":"285AEA4B-0DEE-41F4-8669-800E9582A6E7","triggerType":0},
++            {"acknowledgedDate":"2100-01-02T03:06:00.000Z","alertIdentifier":"a4","backgroundContent":"{\"acknowledgeActionButtonLabel\":\"OK\",\"body\":\"background\",\"title\":\"BACKGROUND\"}","interruptionLevel":"timeSensitive","issuedDate":"2100-01-02T03:06:00.000Z","managerIdentifier":"m4","modificationCounter":4,"syncIdentifier":"4B3109BD-DE11-42BD-A777-D4783459C483","triggerType":0}
++            ]
++            """#)
+         XCTAssertEqual(progress.completedUnitCount, 3 * 1)
+     }
+ 
+diff --git a/LoopTests/Managers/Alerts/StoredAlertTests.swift b/LoopTests/Managers/Alerts/StoredAlertTests.swift
+index 504a672fae..85fe753c7d 100644
+--- a/LoopTests/Managers/Alerts/StoredAlertTests.swift
++++ b/LoopTests/Managers/Alerts/StoredAlertTests.swift
+@@ -45,10 +45,10 @@ class StoredAlertEncodableTests: XCTestCase {
+             let storedAlert = StoredAlert(from: alert, context: managedObjectContext, syncIdentifier: UUID(uuidString: "A7073F28-0322-4506-A733-CF6E0687BAF7")!)
+             XCTAssertEqual(.active, storedAlert.interruptionLevel)
+             storedAlert.issuedDate = dateFormatter.date(from: "2020-05-14T21:00:12Z")!
+-            try! assertStoredAlertEncodable(storedAlert, encodesJSON: """
++            try! assertStoredAlertEncodable(storedAlert, encodesJSON: #"""
+             {
+               "alertIdentifier" : "bar",
+-              "backgroundContent" : "{\\\"title\\\":\\\"BACKGROUND\\\",\\\"acknowledgeActionButtonLabel\\\":\\\"OK\\\",\\\"body\\\":\\\"background\\\"}",
++              "backgroundContent" : "{\"acknowledgeActionButtonLabel\":\"OK\",\"body\":\"background\",\"title\":\"BACKGROUND\"}",
+               "interruptionLevel" : "active",
+               "issuedDate" : "2020-05-14T21:00:12Z",
+               "managerIdentifier" : "foo",
+@@ -56,15 +56,15 @@ class StoredAlertEncodableTests: XCTestCase {
+               "syncIdentifier" : "A7073F28-0322-4506-A733-CF6E0687BAF7",
+               "triggerType" : 0
+             }
+-            """
++            """#
+             )
+ 
+             storedAlert.interruptionLevel = .critical
+             XCTAssertEqual(.critical, storedAlert.interruptionLevel)
+-            try! assertStoredAlertEncodable(storedAlert, encodesJSON: """
++            try! assertStoredAlertEncodable(storedAlert, encodesJSON: #"""
+             {
+               "alertIdentifier" : "bar",
+-              "backgroundContent" : "{\\\"title\\\":\\\"BACKGROUND\\\",\\\"acknowledgeActionButtonLabel\\\":\\\"OK\\\",\\\"body\\\":\\\"background\\\"}",
++              "backgroundContent" : "{\"acknowledgeActionButtonLabel\":\"OK\",\"body\":\"background\",\"title\":\"BACKGROUND\"}",
+               "interruptionLevel" : "critical",
+               "issuedDate" : "2020-05-14T21:00:12Z",
+               "managerIdentifier" : "foo",
+@@ -72,7 +72,7 @@ class StoredAlertEncodableTests: XCTestCase {
+               "syncIdentifier" : "A7073F28-0322-4506-A733-CF6E0687BAF7",
+               "triggerType" : 0
+             }
+-            """
++            """#
+             )
+         }
+     }
+diff --git a/LoopTests/ViewModels/BolusEntryViewModelTests.swift b/LoopTests/ViewModels/BolusEntryViewModelTests.swift
+index c373b639b1..7f2c421ebf 100644
+--- a/LoopTests/ViewModels/BolusEntryViewModelTests.swift
++++ b/LoopTests/ViewModels/BolusEntryViewModelTests.swift
+@@ -702,14 +702,14 @@ class BolusEntryViewModelTests: XCTestCase {
+     func testCarbEntryDateAndAbsorptionTimeString() async throws {
+         await setUpViewModel(originalCarbEntry: mockOriginalCarbEntry, potentialCarbEntry: mockPotentialCarbEntry)
+ 
+-        XCTAssertEqual("12:00 PM + 0m", bolusEntryViewModel.carbEntryDateAndAbsorptionTimeString)
++        XCTAssertEqual("12:00 PM + 0m", bolusEntryViewModel.carbEntryDateAndAbsorptionTimeString)
+     }
+     
+     func testCarbEntryDateAndAbsorptionTimeString2() async throws {
+         let potentialCarbEntry = NewCarbEntry(quantity: BolusEntryViewModelTests.exampleCarbQuantity, startDate: Self.exampleStartDate, foodType: nil, absorptionTime: nil)
+         await setUpViewModel(originalCarbEntry: mockOriginalCarbEntry, potentialCarbEntry: potentialCarbEntry)
+ 
+-        XCTAssertEqual("12:00 PM", bolusEntryViewModel.carbEntryDateAndAbsorptionTimeString)
++        XCTAssertEqual("12:00 PM", bolusEntryViewModel.carbEntryDateAndAbsorptionTimeString)
+     }
+ 
+     func testIsManualGlucosePromptVisible() throws {
+
+From d5065b274d828a9f314dff48996c02cbc28e4866 Mon Sep 17 00:00:00 2001
+From: Marion Barker <marionbarker@earthlink.net>
+Date: Tue, 23 Apr 2024 19:57:14 -0700
+Subject: [PATCH 2/4] make it easier to save a Favorite Food from Carb Entry
+ screen (#2136)
+
+---
+ Loop/View Models/CarbEntryViewModel.swift | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Loop/View Models/CarbEntryViewModel.swift b/Loop/View Models/CarbEntryViewModel.swift
+index 261c529ed5..37dedee326 100644
+--- a/Loop/View Models/CarbEntryViewModel.swift	
++++ b/Loop/View Models/CarbEntryViewModel.swift	
+@@ -140,7 +140,7 @@ final class CarbEntryViewModel: ObservableObject {
+     
+     var saveFavoriteFoodButtonDisabled: Bool {
+         get {
+-            if let carbsQuantity, 0...maxCarbEntryQuantity.doubleValue(for: preferredCarbUnit) ~= carbsQuantity, foodType != "", selectedFavoriteFoodIndex == -1 {
++            if let carbsQuantity, 0...maxCarbEntryQuantity.doubleValue(for: preferredCarbUnit) ~= carbsQuantity, selectedFavoriteFoodIndex == -1 {
+                 return false
+             }
+             return true
+
+From 6cf0285e13f6523339b6a4758558cd66d0153c2e Mon Sep 17 00:00:00 2001
+From: Marion Barker <marionbarker@earthlink.net>
+Date: Tue, 23 Apr 2024 19:58:32 -0700
+Subject: [PATCH 3/4] remove shaking phone as trigger for presentDebugMenu
+ (#2149)
+
+---
+ Loop/View Controllers/StatusTableViewController.swift | 9 ---------
+ 1 file changed, 9 deletions(-)
+
+diff --git a/Loop/View Controllers/StatusTableViewController.swift b/Loop/View Controllers/StatusTableViewController.swift
+index 8906a75986..6a4aadfcdd 100644
+--- a/Loop/View Controllers/StatusTableViewController.swift	
++++ b/Loop/View Controllers/StatusTableViewController.swift	
+@@ -1865,15 +1865,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
+         lastOrientation = UIDevice.current.orientation
+     }
+ 
+-    override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
+-        guard FeatureFlags.allowDebugFeatures else {
+-            return
+-        }
+-        if motion == .motionShake {
+-            presentDebugMenu()
+-        }
+-    }
+-
+     private func presentDebugMenu() {
+         guard FeatureFlags.allowDebugFeatures else {
+             return
+
+From 1aaee2db4953dbcdbe71a15cad967dbb190dc238 Mon Sep 17 00:00:00 2001
+From: Pete Schwamb <pete@schwamb.net>
+Date: Sat, 13 Jul 2024 14:43:49 -0500
+Subject: [PATCH 4/4] Bump version to 3.5.0 to signify dev branch
+
+---
+ Version.xcconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Version.xcconfig b/Version.xcconfig
+index 373efdca05..a7c7fe29d1 100644
+--- a/Version.xcconfig
++++ b/Version.xcconfig
+@@ -7,7 +7,7 @@
+ //
+ 
+ // Version [DEFAULT]
+-LOOP_MARKETING_VERSION = 3.3.0
++LOOP_MARKETING_VERSION = 3.5.0
+ CURRENT_PROJECT_VERSION = 57
+ 
+ // Optional override
