@@ -10,7 +10,7 @@ Subject: [PATCH 1/4] Updates to tests for iOS 17 (#2080)
  .../ViewModels/BolusEntryViewModelTests.swift |  4 ++--
  4 files changed, 31 insertions(+), 21 deletions(-)
 
-diff --git a/Loop/Loop/Managers/Alerts/StoredAlert.swift b/Loop/Loop/Managers/Alerts/StoredAlert.swift
+diff --git a//Loop/Loop/Managers/Alerts/StoredAlert.swift b/Loop/Loop/Managers/Alerts/StoredAlert.swift
 index fb5b431074..39ecc0a041 100644
 --- a/Loop/Loop/Managers/Alerts/StoredAlert.swift
 +++ b/Loop/Loop/Managers/Alerts/StoredAlert.swift
