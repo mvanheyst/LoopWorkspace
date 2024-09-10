@@ -277,6 +277,9 @@ jobs:
           # Several patches may be added per submodule.
           # Adding comments (#) may be useful to easily tell the individual patches apart.
 
+          # Module: File: code customization description
+          Curl https://github.com/mvanheyst/Loop/commit/bebd85939569b79a06f755a4a7198891580e5619.patch | git apply -v --directory=Loop
+
          
       # Patch Fastlane Match to not print tables
       - name: Patch Match Tables
